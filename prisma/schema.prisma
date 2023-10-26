@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  email     String    @unique
+  profile   Profile?
+  transactions Transaction[]
+}
+
+model Profile {
+  id       Int    @id @default(autoincrement())
+  fullName String
+  userId   Int    @unique
+  user     User   @relation(fields: [userId], references: [id])
+}
+
+model Brand {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  phones Phone[]
+}
+
+model Phone {
+  id      Int      @id @default(autoincrement())
+  model   String
+  brandId Int
+  brand   Brand    @relation(fields: [brandId], references: [id])
+  transactions Transaction[]
+}
+
+model Transaction {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  phoneId   Int
+  promoId   Int?
+  isPaid    Boolean   @default(false)
+  user      User      @relation(fields: [userId], references: [id])
+  phone     Phone     @relation(fields: [phoneId], references: [id])
+  promo     Promo?    @relation(fields: [promoId], references: [id])
+}
+
+model Promo {
+  id          Int           @id @default(autoincrement())
+  code        String        @unique
+  discount    Float
+  transactions Transaction[]
+}
